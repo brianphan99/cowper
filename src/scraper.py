@@ -34,8 +34,8 @@ def get_html(url, delay=5):
         # Parse the HTML content with BeautifulSoup
         soup = BeautifulSoup(html, 'html.parser')
 
-        # Return the prettified HTML content
-        return soup.prettify()
+        # Return the HTML soup
+        return soup
 
     except Exception as e:
         print(f"An error occurred: {e}")
