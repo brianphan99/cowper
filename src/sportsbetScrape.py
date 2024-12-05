@@ -35,12 +35,25 @@ def formatDate(dateStr):
     return formattedDate
 
 # gets sportsbet matches and returns object of odds and dates
-def parseSportsbet(url ='https://www.sportsbet.com.au/betting/soccer'):
+def parseSportsbet(sport):
+    url = 0
+    if sport == 'soccer':
+        url = 'https://www.sportsbet.com.au/betting/soccer'
+    elif sport == 'tennis':
+        url = 'https://www.sportsbet.com.au/betting/tennis'
+
     html = get_html(url, 1)
 
     # find the container for all the matches (separated into days (divs))
-    daysContainer = html.find('div', {'data-automation-id': 'class-featured-events-container'})
-    days = daysContainer.findChildren(recursive=False)
+    daysContainer = 0
+    days = 0
+    if sport == 'soccer':
+        daysContainer = html.find('div', {'data-automation-id': 'class-featured-events-container'})
+        days = daysContainer.findChildren(recursive=False)
+    elif sport == 'tennis':
+        daysContainer = html.find('ul', class_=re.compile(r'.*upcomingEventsListDesktop.*'))
+        days = daysContainer.findChildren(recursive=False)
+        days.pop(0)
 
     matches = []
 
@@ -68,19 +81,24 @@ def parseSportsbet(url ='https://www.sportsbet.com.au/betting/soccer'):
         
         matches.append(matchDay)
 
-    return(matches)
+    # Open a file for writing \
+    with open(f'./src/matchData/sportsbet{sport}.csv', 'w', newline='') as csvfile: 
+        csvwriter = csv.writer(csvfile)
 
-matches = parseSportsbet()
+        # Write header row 
+        soccerHeaders = ['Date', 'Time', 'Team1', 'Odds1', 'Draw', 'Draw Odds', 'Team2', 'Odds2']
+        tennisHeaders = ['Date', 'Time', 'Player1', 'Odds1', 'Player2', 'Odds2']
+        
+        header = soccerHeaders if sport == 'soccer' else tennisHeaders
+        csvwriter.writerow(header)
 
-# Open a file for writing \
-with open('./src/matchData/sportsbetMatches.csv', 'w', newline='') as csvfile: 
-    csvwriter = csv.writer(csvfile) 
-    # Write header row 
-    csvwriter.writerow(['Date', 'Time', 'Team1', 'Odds1', 'Outcome', 'Draw Odds', 'Team2', 'Odds2'])
+        # Write data rows
+        for match_day in matches: 
+            for match in match_day["matches"]: 
+                if len(match["odds"]) != (len(header) - 2): continue
+                row = [match_day["date"], match["time"]] + match['odds']
+                csvwriter.writerow(row)
 
-    # Write data rows
-    for match_day in matches: 
-        for match in match_day["matches"]: 
-            if len(match["odds"]) != 6: continue
-            row = [match_day["date"], match["time"], match["odds"][0], match["odds"][1], 'Draw', match["odds"][3], match["odds"][4], match["odds"][5]]
-            csvwriter.writerow(row)
+    return matches
+
+matches = parseSportsbet('tennis')
