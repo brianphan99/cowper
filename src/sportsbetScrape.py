@@ -1,28 +1,16 @@
 from scraper import get_html
 import re
 import csv
-from datetime import datetime
 
-# gets sportsbet matches and returns object of odds and dates
+# scrapes sportsbet, writes to csv and returns array of matches 
 def parseSportsbet(sport):
-    url = None
-    if sport == 'soccer':
-        url = 'https://www.sportsbet.com.au/betting/soccer'
-    elif sport == 'tennis':
-        url = 'https://www.sportsbet.com.au/betting/tennis'
+    url = f'https://www.sportsbet.com.au/betting/{sport}'
 
     html = get_html(url, 1)
 
     # find the container for all the matches (separated into days (divs))
-    daysContainer = None
-    days = None
-    if sport == 'soccer':
-        daysContainer = html.find('div', {'data-automation-id': 'class-featured-events-container'})
-        days = daysContainer.findChildren(recursive=False)
-    elif sport == 'tennis':
-        daysContainer = html.find('ul', class_=re.compile(r'.*upcomingEventsListDesktop.*'))
-        days = daysContainer.findChildren(recursive=False)
-        days.pop(0)
+    daysContainer = html.find('div', {'data-automation-id': 'class-featured-events-container'})
+    days = daysContainer.findChildren(recursive=False)
 
     matches = []
 
@@ -31,19 +19,15 @@ def parseSportsbet(sport):
         match_elements = day.find_all('li', class_=re.compile(r'.*cardOuterItem.*'))
 
         for match_element in match_elements:
-            match = {}
             # get time of match
             time = match_element.find('time').get('datetime')
-            match['datetime'] = time
 
             # get odds
             odds_element = match_element.find('div', class_=re.compile(r'.*outcomeCardItems.*'))
             odds = odds_element.get_text('|', strip=True).split('|')
-            match['odds'] = odds
 
-            matches.append(match)
+            matches.append({'datetime': time, 'odds': odds})
         
-
     writeToCsv(matches, sport)
 
     return matches
@@ -67,4 +51,4 @@ def writeToCsv(data, sport):
             csvwriter.writerow(row)
 
 
-parseSportsbet('soccer')
+parseSportsbet('tennis')
