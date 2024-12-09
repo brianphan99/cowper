@@ -3,7 +3,7 @@ import re
 import csv
 
 # scrapes sportsbet, writes to csv and returns array of matches 
-def parseSportsbet(sport):
+def scrapeSportsbet(sport):
     url = f'https://www.sportsbet.com.au/betting/{sport}'
 
     html = get_html(url, 1)
@@ -51,4 +51,4 @@ def writeToCsv(data, sport):
             csvwriter.writerow(row)
 
 
-parseSportsbet('tennis')
+scrapeSportsbet('tennis')

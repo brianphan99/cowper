@@ -2,7 +2,7 @@ from scraper import get_html
 import csv
 
 # scrapes ladbrokes, writes to csv and returns array of matches 
-def parseLadbrokes(sport, region = 8):
+def scrapeLadbrokes(sport, region = 8):
 	url = None
 
 	if sport == 'soccer':
@@ -41,4 +41,4 @@ def writeToCsv(data, sport, region):
 			row = [match['datetime']] + match['odds']
 			writer.writerow(row)
 
-parseLadbrokes('soccer')
+scrapeLadbrokes('soccer')
