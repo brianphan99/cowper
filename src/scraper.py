@@ -22,6 +22,11 @@ def get_html(url, delay=5):
         # Set up the Selenium WebDriver with options
         driver = webdriver.Chrome(options=chrome_options)
 
+        # ladbrokes only shows odds when window size is big
+        driver.set_window_size(1920, 1080)
+        # set implicit wait time
+        driver.implicitly_wait(10)
+
         # Open the page with Selenium
         driver.get(url)
 
