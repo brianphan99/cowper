@@ -5,13 +5,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 
-def get_html(url):
+def get_html(url, triggerElement):
     """
     Scrapes the HTML content of a given URL and returns it as a string.
 
     Parameters:
     - url: The URL of the webpage to scrape.
-    - delay: Time in seconds to wait for the page to load. Defaults to 5 seconds.
+    - triggerElement: Wait for this element to load before getting the page
 
     Returns:
     - A string containing the prettified HTML content of the page.
@@ -30,17 +30,11 @@ def get_html(url):
         # Open the page with Selenium
         driver.get(url)
 
-        selector = None
-        if 'ladbrokes' in url:
-            selector = 'div.competition-events__date-group'
-        elif 'sportsbet' in url:
-            selector = 'div[data-automation-id=class-featured-events-container]'
-
         # Use an explicit wait to wait for a specific element to be loaded
         try:
             # Wait for up to 10 seconds for the element to appear
             WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+                EC.presence_of_element_located((By.CSS_SELECTOR, triggerElement))
             )
         except Exception as e:
             print("Error: Element not found within the time limit")
