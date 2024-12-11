@@ -19,6 +19,7 @@ def scrapeSportsbet(sport):
         match_elements = day.find_all('li', class_=re.compile(r'.*cardOuterItem.*'))
 
         for match_element in match_elements:
+            if (not match_element.find('time')): continue
             # get time of match
             time = formatTime(match_element.find('time').get('datetime'))
 
