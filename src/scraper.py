@@ -1,9 +1,11 @@
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
-import time
 
-def get_html(url, delay=5):
+def get_html(url):
     """
     Scrapes the HTML content of a given URL and returns it as a string.
 
@@ -24,14 +26,25 @@ def get_html(url, delay=5):
 
         # ladbrokes only shows odds when window size is big
         driver.set_window_size(1920, 1080)
-        # set implicit wait time
-        driver.implicitly_wait(10)
 
         # Open the page with Selenium
         driver.get(url)
 
-        # Add a delay to allow the page to load
-        time.sleep(delay)
+        selector = None
+        if 'ladbrokes' in url:
+            selector = 'div.competition-events__date-group'
+        elif 'sportsbet' in url:
+            selector = 'div[data-automation-id=class-featured-events-container]'
+
+        # Use an explicit wait to wait for a specific element to be loaded
+        try:
+            # Wait for up to 10 seconds for the element to appear
+            WebDriverWait(driver, 10).until(
+                EC.presence_of_element_located((By.CSS_SELECTOR, selector))
+            )
+        except Exception as e:
+            print("Error: Element not found within the time limit")
+            driver.quit()
 
         # Get the page source after JavaScript has executed
         html = driver.page_source
