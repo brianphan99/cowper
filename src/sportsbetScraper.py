@@ -1,12 +1,13 @@
 from scraper import get_html
 import re
 import csv
+from datetime import datetime, timezone
 
 # scrapes sportsbet, writes to csv and returns array of matches 
 def scrapeSportsbet(sport):
     url = f'https://www.sportsbet.com.au/betting/{sport}'
 
-    html = get_html(url, 1)
+    html = get_html(url)
 
     # find the container for all the matches (separated into days (divs))
     daysContainer = html.find('div', {'data-automation-id': 'class-featured-events-container'})
@@ -21,6 +22,7 @@ def scrapeSportsbet(sport):
         for match_element in match_elements:
             # get time of match
             time = match_element.find('time').get('datetime')
+            time = datetime.fromisoformat(time).astimezone(timezone.utc).isoformat()
 
             # get odds
             odds_element = match_element.find('div', class_=re.compile(r'.*outcomeCardItems.*'))
@@ -49,6 +51,3 @@ def writeToCsv(data, sport):
             if len(match["odds"]) != (len(header) - 1): continue
             row = [match["datetime"]] + match['odds']
             csvwriter.writerow(row)
-
-
-scrapeSportsbet('tennis')
