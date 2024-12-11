@@ -27,5 +27,23 @@ def writeToCsv(data, sport, fileName):
             row = [match["datetime"]] + match['odds']
             csvwriter.writerow(row)
 
+def readFromCsv(fileName):
+    """
+    Reads data from a CSV file located in the 'src/matchData' directory.
+
+    Args:
+        fileName (str): The name of the CSV file to read, without the '.csv' extension.
+
+    Returns:
+        list: A list of rows, where each row is represented as a list of strings.
+    """
+    data = []   
+    with open(f'./src/matchData/{fileName}.csv', mode="r") as csvfile:
+        csvreader = csv.reader(csvfile)
+        next(csvreader)
+        for row in csvreader:
+          data.append(row)
+        return data
+
 def formatTime(time):
     return datetime.fromisoformat(time).astimezone(timezone.utc).isoformat()
