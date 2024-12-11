@@ -1,23 +1,31 @@
 # arb functions
+#
 # note: rounding to 2 decimal places is done where money is used
+#
+# odds = array of array of odds for each site
+# e.g.: [<sportsbet>[1.0, 2.3, 3.4], <ladbrokes>[3.2, 2.1, 4.4], ...]
+
 
 # main arb function
-def arb(inv, odds1, odds2):
-    if (checkArb(odds1, odds2)):
-        print('Arb found!')
+def arb(inv, odds):
+    if (checkArb(odds)):
+        print('\nArb found!')
 
-        impP = totalP(odds1, odds2)
-        print(f'Total Implied Probability: {impP}')
+        bestOdds = maxOdds(odds)
+        print(f'Best Odds\n {bestOdds}')
 
-        bestOdds = maxOdds(odds1, odds2)
-        stakes = calcStakes(inv, bestOdds, impP)
-        print(f'Stake Distribution (${inv} investment): {stakes}')
+        impP = totalP(parseOdds(bestOdds))
+        print(f'Total Implied Probability\n {impP}')
 
-        aReturns = calcReturns(stakes, bestOdds)
-        print(f'Returns: {aReturns}')
+        stakes = calcStakes(inv, parseOdds(bestOdds), impP)
+        print(f'Stake Distribution (${inv} investment)\n {stakes}')
 
+        aReturns = calcReturns(stakes, parseOdds(bestOdds))
+        print(f'Returns\n {aReturns}')
 
-
+        return True
+    else:
+        return False
 
 # calculates implied probabilities
 def calcImpP(odds):
@@ -27,19 +35,24 @@ def calcImpP(odds):
 
     return p
 
-# calculates best (max) odds given two sets
-def maxOdds(odds1, odds2):
+# calculates best (max) odds given n sites
+def maxOdds(odds):
     oddsMax = []
-    for i in range(len(odds1)):
-        oddsMax.append(max(odds1[i], odds2[i]))
+    for i in range(len(odds[0])):
+        # array of odds for a given outcome across all sites
+        outcomeOdds = [o[i] for o in odds]
+
+        maxOdd = max(outcomeOdds)
+        oddsMax.append({'site': outcomeOdds.index(maxOdd), 'odds': maxOdd})
 
     return oddsMax
 
-# calculates total best (minimum) implied probabilities given 2 sets of odds
-def totalP(odds1, odds2):
-    # get best odds
-    bestOdds = maxOdds(odds1, odds2)
+# parses maxOdds array of objects into array of odds
+def parseOdds(odds):
+    return [o['odds'] for o in odds]
 
+# calculates total best (minimum) implied probabilities given best odds
+def totalP(bestOdds):
     # calculate implied probabilities
     impP = []
     for i in range(len(bestOdds)):
@@ -52,9 +65,10 @@ def totalP(odds1, odds2):
 
 
 # checks whether an opportunity is available
-def checkArb(odds1, odds2):
+def checkArb(odds):
+    bestOdds = maxOdds(odds)
     # check whether sum of probabilities is less than 100%
-    return totalP(odds1, odds2) < 1
+    return totalP(parseOdds(bestOdds)) < 1
 
 # calculates stake distribution
 def calcStakes(investment, odds, pTotal):
@@ -66,6 +80,7 @@ def calcStakes(investment, odds, pTotal):
     return stakes
 
 # calculates possible profits
+# returns array of profits
 def calcReturns(stakes, odds):
     profits = []
 
