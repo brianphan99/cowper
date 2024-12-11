@@ -111,7 +111,7 @@ def matching(sitesData):
             match = match_1[1] + " vs " + match_1[5]  
             if match not in data:
                 # Initialize data with odds from the first site
-                data[match] = [[float(match_1[2]), float(match_1[4]), float(match_1[6])]]
+                data[match] = [[float(match_1[i]) for i in range(2, len(match_1), 2)]]
 
             # Compare with matches from the other sites
             for match_2 in sitesData[index]:
@@ -130,14 +130,14 @@ def matching(sitesData):
                         # Determine the best match for team names
                         if similarity_score(match_1[1], match_2[1]) > similarity_score(match_1[1], match_2[5]):
                             if index == len(data[match]) - 1:
-                                data[match][-1] = [float(match_2[2]), float(match_2[4]), float(match_2[6])]
+                                data[match][-1] = [float(match_2[i]) for i in range(2, len(match_2), 2)]
                             else:
-                                data[match].append([float(match_2[2]), float(match_2[4]), float(match_2[6])])
+                                data[match].append([float(match_2[i]) for i in range(2, len(match_2), 2)])
                         else:
                             if index == len(data[match]) - 1:
-                                data[match][-1] = [float(match_2[6]), float(match_2[4]), float(match_2[2])]
+                                data[match][-1] = [float(match_2[i]) for i in range(len(match_2) - 1, 1, -2)]
                             else:
-                                data[match].append([float(match_2[6]), float(match_2[4]), float(match_2[2])])
+                                data[match].append([float(match_2[i]) for i in range(len(match_2) - 1, 1, -2)])
 
             # Remove matches with low similarity score
             if best_score < 0.5:
