@@ -86,7 +86,7 @@ def similarity_score(name1, name2):
     char_similarity = (max_len - levenshtein_dist) / max_len if max_len > 0 else 1.0
 
     # Combine with weights
-    return 0.7 * token_similarity + 0.3 * char_similarity
+    return 0.8 * token_similarity + 0.2 * char_similarity
 
 def matching(sitesData):
     """
@@ -146,8 +146,13 @@ def matching(sitesData):
     return data
 
 # Read data from CSV files and perform matching
-data = matching([readFromCsv('sportsbet_soccer'), readFromCsv('ladbrokes_soccer_0')])
+data = matching([readFromCsv('sportsbet_soccer'), readFromCsv('ladbrokes_soccer')])
+
+print('\n')
+print(f'Found {len(data)} matches\n')
+print('Looking for arbs...\n')
 
 # Perform arbitrage calculations on the matched data
 for match in data:
+    print(match)
     arb(100, data[match])
