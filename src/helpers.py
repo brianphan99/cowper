@@ -1,5 +1,8 @@
 import csv
 from datetime import datetime, timezone
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 # headers for all sports
 SOCCER_HEADERS = ['datetime', 'team1', 'odds1', 'draw', 'oddsdraw', 'team2', 'odds2']
@@ -65,16 +68,11 @@ def readFromCsv(fileName):
 def formatTime(time):
     return datetime.fromisoformat(time).astimezone(timezone.utc).isoformat()
 
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-
 def send_email(recipient_email, subject, body):
     try:
         # sender
-        sender_email = "abitrage.cowper@gmail.com"
-        # sender_password = "Cowper2024"
-        sender_password = "khjo sdte htmr jops"
+        sender_email = "arbitrage.cowper@gmail.com"
+        sender_password = "hllp zksz wvbi twwc"
 
         # Set up the email content
         message = MIMEMultipart()
@@ -95,4 +93,5 @@ def send_email(recipient_email, subject, body):
 
     except Exception as e:
         print(f"An error occurred: {e}")
+
 
