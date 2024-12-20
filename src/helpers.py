@@ -64,3 +64,35 @@ def readFromCsv(fileName):
 
 def formatTime(time):
     return datetime.fromisoformat(time).astimezone(timezone.utc).isoformat()
+
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def send_email(recipient_email, subject, body):
+    try:
+        # sender
+        sender_email = "abitrage.cowper@gmail.com"
+        # sender_password = "Cowper2024"
+        sender_password = "khjo sdte htmr jops"
+
+        # Set up the email content
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["To"] = recipient_email
+        message["Subject"] = subject
+
+        # Attach the email body
+        message.attach(MIMEText(body, "plain"))
+
+        # Connect to the Gmail SMTP server
+        with smtplib.SMTP("smtp.gmail.com", 587) as server:
+            server.starttls()  # Upgrade the connection to a secure encrypted SSL/TLS connection
+            server.login(sender_email, sender_password)  # Log in to your email account
+            server.send_message(message)  # Send the email
+
+        print("Email sent successfully!")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
