@@ -39,6 +39,7 @@ def get_html(url, triggerElement):
         except Exception as e:
             print("Error: Element not found within the time limit")
             driver.quit()
+            return None
 
         # Get the page source after JavaScript has executed
         html = driver.page_source

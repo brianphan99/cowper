@@ -15,8 +15,8 @@ def scrapeLadbrokes(sport):
 
 		url = f'https://www.ladbrokes.com.au/sports/soccer/{regions[i]}'
 
-		html = get_html(url, 'div.competition-events__date-group')
 		print(f'Scraping Ladbrokes {sport} {regions[i]}')
+		html = get_html(url, 'div.competition-events__date-group')
 
 		# all date groups
 		dateGrs = html.find_all('div', class_='competition-events__date-group')

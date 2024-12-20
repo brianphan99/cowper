@@ -6,8 +6,8 @@ from helpers import writeToCsv, formatTime
 def scrapeSportsbet(sport):
     url = f'https://www.sportsbet.com.au/betting/{sport}'
 
-    html = get_html(url, 'div[data-automation-id=class-featured-events-container]')
     print(f'Scraping Sportsbet {sport}')
+    html = get_html(url, 'div[data-automation-id=class-featured-events-container]')
 
     # find the container for all the matches (separated into days (divs))
     daysContainer = html.find('div', {'data-automation-id': 'class-featured-events-container'})
