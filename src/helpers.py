@@ -1,8 +1,12 @@
 import csv
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import json
+from matchData.Constants import API_KEY
+import requests
+from arb import totalP, parseOdds
 
 # headers for all sports
 SOCCER_HEADERS = ['datetime', 'team1', 'odds1', 'draw', 'oddsdraw', 'team2', 'odds2']
@@ -93,26 +97,7 @@ def send_email(recipient_email, subject, body):
 
     except Exception as e:
         print(f"An error occurred: {e}")
-
-
-import requests
-
-def getOdds(sport):
-        
-    # An api key is emailed to you when you sign up to a plan
-    # Get a free API key at https://api.the-odds-api.com/
-    API_KEY = ''
-
-    SPORT = sport # use the sport_key from the /sports endpoint below, or use 'upcoming' to see the next 8 games across all sports
-
-    REGIONS = 'au' # uk | us | eu | au. Multiple can be specified if comma delimited
-
-    MARKETS = 'h2h' # h2h | spreads | totals. Multiple can be specified if comma delimited
-
-    ODDS_FORMAT = 'decimal' # decimal | american
-
-    DATE_FORMAT = 'iso' # iso | unix
-
+def getSports():
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
     #
     # First get a list of in-season sports
@@ -120,7 +105,7 @@ def getOdds(sport):
     #
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 
-    """ sports_response = requests.get(
+    sports_response = requests.get(
         'https://api.the-odds-api.com/v4/sports', 
         params={
             'api_key': API_KEY
@@ -132,9 +117,28 @@ def getOdds(sport):
         print(f'Failed to get sports: status_code {sports_response.status_code}, response body {sports_response.text}')
 
     else:
-        print('List of in season sports:', sports_response.json())
- """
+        sports = []
+        for sport in sports_response.json():
+            if sport["group"] == "Soccer":
+                sports.append(sport["key"])
+        return sports
+        with open('./src/matchData/sports.json', 'w') as f:
+          json.dump(sports_response.json(), f)
 
+def getOdds(sport):
+        
+    # An api key is emailed to you when you sign up to a plan
+    # Get a free API key at https://api.the-odds-api.com/
+
+    SPORT = sport # use the sport_key from the /sports endpoint below, or use 'upcoming' to see the next 8 games across all sports
+
+    REGIONS = 'au' # uk | us | eu | au. Multiple can be specified if comma delimited
+
+    MARKETS = 'h2h' # h2h | spreads | totals. Multiple can be specified if comma delimited
+
+    ODDS_FORMAT = 'decimal' # decimal | american
+
+    DATE_FORMAT = 'iso' # iso | unix
 
     # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
     #
@@ -162,8 +166,43 @@ def getOdds(sport):
     else:
         odds_json = odds_response.json()
         print('Number of events:', len(odds_json))
-        print(odds_json)
+
+        with open('./src/matchData/data.json', 'r') as file:
+            data = json.load(file)
+
+        data.append(odds_json)
+
+        with open('./src/matchData/data.json', 'w') as f:
+          json.dump(data, f)
 
         # Check the usage quota
         print('Remaining requests', odds_response.headers['x-requests-remaining'])
         print('Used requests', odds_response.headers['x-requests-used'])
+
+# sports = getSports()
+# with open('./src/matchData/data.json', 'w') as f:
+#   json.dump([], f)
+# for sport in sports: 
+#   getOdds(sport)
+  
+
+with open('./src/matchData/data.json', 'r') as file:
+    data = json.load(file)  # Load JSON data into a Python object
+
+    for league in data:
+        for match in league:
+            win_team = match["home_team"]
+            lose_team = match["away_team"]
+
+            max_win_odds = 0
+            max_draw_odds = 0
+            max_lose_odds = 0
+            for bookmaker in match["bookmakers"]:
+              max_win_odds = max(bookmaker["markets"][0]["outcomes"][0]["price"] , max_win_odds)
+              max_lose_odds = max(bookmaker["markets"][0]["outcomes"][1]["price"] , max_lose_odds)
+              max_draw_odds = max(bookmaker["markets"][0]["outcomes"][2]["price"] , max_draw_odds)
+
+            if totalP([max_win_odds, max_draw_odds, max_lose_odds]) < 1:
+              print(win_team + " vs " + lose_team)
+              print(max_win_odds, max_lose_odds, max_draw_odds)
+              print
